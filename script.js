@@ -4,7 +4,13 @@ const itemList = document.querySelector("#item-list");
 const clearBtn = document.querySelector("#clear");
 const itemFilter = document.querySelector("#filter");
 
-function addItem(e) {
+function displayItems() {
+    const itemsFromStorage = getItemsFromStorage();
+    itemsFromStorage.forEach((item) => addListItem(item));
+    checkUI();
+}
+
+function addItemSubmit(e) {
     e.preventDefault();
 
     const newItem = itemInput.value;
@@ -15,13 +21,16 @@ function addItem(e) {
         return;
     }
 
-    //Create list item
+    //Create list item on document
     addListItem(newItem);
+    //add item to local storage
+    addItemToStorage(newItem);
+    console.log("added2");
 
     itemInput.value = "";
 }
 
-//Create list item only. Using for Debugging since live preview is breaking
+//Create list item only.
 function addListItem(text) {
     const li = document.createElement("li");
     li.appendChild(document.createTextNode(text));
@@ -33,6 +42,28 @@ function addListItem(text) {
     itemList.appendChild(li);
 
     return li;
+}
+
+function addItemToStorage(item) {
+    const itemsFromStorage = getItemsFromStorage();
+
+    itemsFromStorage.push(item);
+
+    //convert to JSON string and set to local storage
+    localStorage.setItem("items", JSON.stringify(itemsFromStorage));
+}
+
+function getItemsFromStorage() {
+    let itemsFromStorage;
+
+    //figure out what the current set of items in storage is, make it into a list
+    console.log("begin if else");
+    if (localStorage.getItem("items") === null) {
+        itemsFromStorage = [];
+    } else {
+        itemsFromStorage = JSON.parse(localStorage.getItem("items"));
+    }
+    return itemsFromStorage;
 }
 
 //Make the Button with the icon
@@ -87,7 +118,6 @@ function filterItems(e) {
 //check elements for the hiding of filter and clear button
 function checkUI() {
     const items = itemList.querySelectorAll("li");
-    console.log("made it to checkUI");
     if (items.length == 0) {
         clearBtn.style.display = "none";
         itemFilter.style.display = "none";
@@ -95,12 +125,18 @@ function checkUI() {
         clearBtn.style.display = "block";
         itemFilter.style.display = "block";
     }
-    console.log("about to return");
     return;
 }
 
-//Event Listeners
-itemForm.addEventListener("submit", addItem);
-itemList.addEventListener("click", removeItemFromIcon);
-clearBtn.addEventListener("click", clearItems);
-itemFilter.addEventListener("input", filterItems);
+//initialize app
+function init() {
+    //Event Listeners
+    itemForm.addEventListener("submit", addItemSubmit);
+    itemList.addEventListener("click", removeItemFromIcon);
+    clearBtn.addEventListener("click", clearItems);
+    itemFilter.addEventListener("input", filterItems);
+    document.addEventListener("DOMContentLoaded", displayItems);
+    checkUI();
+}
+
+init();
