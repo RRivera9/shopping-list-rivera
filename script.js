@@ -70,6 +70,21 @@ function clearItems() {
     checkUI();
 }
 
+function filterItems(e) {
+    const items = itemList.querySelectorAll("li");
+    const text = e.target.value.toLowerCase();
+
+    items.forEach((item) => {
+        const itemName = item.firstChild.textContent.toLowerCase();
+        if (itemName.indexOf(text) != -1) {
+            item.style.display = "flex";
+        } else {
+            item.style.display = "none";
+        }
+    });
+}
+
+//check elements for the hiding of filter and clear button
 function checkUI() {
     const items = itemList.querySelectorAll("li");
     console.log("made it to checkUI");
@@ -88,3 +103,4 @@ function checkUI() {
 itemForm.addEventListener("submit", addItem);
 itemList.addEventListener("click", removeItemFromIcon);
 clearBtn.addEventListener("click", clearItems);
+itemFilter.addEventListener("input", filterItems);
