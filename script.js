@@ -3,6 +3,8 @@ const itemInput = document.querySelector("#item-input");
 const itemList = document.querySelector("#item-list");
 const clearBtn = document.querySelector("#clear");
 const itemFilter = document.querySelector("#filter");
+const formBtn = itemForm.querySelector("button");
+let isEditMode = false;
 
 function displayItems() {
     const itemsFromStorage = getItemsFromStorage();
@@ -21,11 +23,24 @@ function addItemSubmit(e) {
         return;
     }
 
+    //Check for edit mode
+    if (isEditMode) {
+        const itemToEdit = itemList.querySelector(".edit-mode");
+        removeItemFromStorage(itemToEdit.textContent);
+        itemToEdit.classList.remove("edit-mode");
+        itemToEdit.remove();
+        isEditMode = false;
+    } else {
+        if (checkIfItemExists(newItem)) {
+            alert("item already exists");
+            return;
+        }
+    }
+
     //Create list item on document
     addListItem(newItem);
     //add item to local storage
     addItemToStorage(newItem);
-    console.log("added2");
 
     itemInput.value = "";
 }
@@ -86,7 +101,27 @@ function onClickItem(e) {
     button = e.target.parentElement;
     if (button.classList.contains("remove-item")) {
         removeItemFromIcon(button.parentElement);
+    } else {
+        setItemToEdit(e.target);
     }
+}
+
+function checkIfItemExists(item) {
+    const itemsFromStorage = getItemsFromStorage();
+
+    return itemsFromStorage.includes(item);
+}
+
+function setItemToEdit(item) {
+    itemList
+        .querySelectorAll("li")
+        .forEach((i) => i.classList.remove("edit-mode"));
+
+    isEditMode = true;
+    item.classList.add("edit-mode");
+    formBtn.innerHTML = '<i class="fa-solid fa-pen"></i>Update Item';
+    formBtn.style.backgroundColor = "#228B22";
+    itemInput.value = item.textContent;
 }
 
 //removes the parent 'li' of the icon
@@ -132,8 +167,9 @@ function filterItems(e) {
     });
 }
 
-//check elements for the hiding of filter and clear button
+//check elements for the hiding of filter and clear button, reset UI
 function checkUI() {
+    itemInput.value = "";
     const items = itemList.querySelectorAll("li");
     if (items.length == 0) {
         clearBtn.style.display = "none";
@@ -142,6 +178,10 @@ function checkUI() {
         clearBtn.style.display = "block";
         itemFilter.style.display = "block";
     }
+    formBtn.innerHTML = '<i class="fa-solid fa-plus"></i> Add Item';
+    formBtn.style.backgroundColor = "#333";
+
+    isEditMode = false;
     return;
 }
 
