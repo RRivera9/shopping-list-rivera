@@ -57,7 +57,6 @@ function getItemsFromStorage() {
     let itemsFromStorage;
 
     //figure out what the current set of items in storage is, make it into a list
-    console.log("begin if else");
     if (localStorage.getItem("items") === null) {
         itemsFromStorage = [];
     } else {
@@ -82,22 +81,40 @@ function createIcon(classes) {
     return icon;
 }
 
-//removes the parent 'li' of the icon
-function removeItemFromIcon(e) {
-    //parent of icon is the button
-    const button = e.target.parentElement;
-
-    //Can do a confirm "are you sure" right here, but I don't like that feature
+function onClickItem(e) {
+    //parent of the x is the button
+    button = e.target.parentElement;
     if (button.classList.contains("remove-item")) {
-        //parent of button is the li
-        button.parentElement.remove();
-        checkUI();
+        removeItemFromIcon(button.parentElement);
     }
+}
+
+//removes the parent 'li' of the icon
+function removeItemFromIcon(item) {
+    //remove item from dom
+    item.remove();
+    //remove item from storage
+    removeItemFromStorage(item.textContent);
+    checkUI();
+}
+
+function removeItemFromStorage(item) {
+    let itemsFromStorage = getItemsFromStorage();
+
+    //filter out items to be removed
+    itemsFromStorage = itemsFromStorage.filter((i) => i !== item);
+
+    //put items back into local storage
+    localStorage.setItem("items", JSON.stringify(itemsFromStorage));
 }
 
 //Clears all the items
 function clearItems() {
     itemList.innerHTML = "";
+
+    //clear from local storage
+    localStorage.removeItem("items");
+
     checkUI();
 }
 
@@ -132,7 +149,7 @@ function checkUI() {
 function init() {
     //Event Listeners
     itemForm.addEventListener("submit", addItemSubmit);
-    itemList.addEventListener("click", removeItemFromIcon);
+    itemList.addEventListener("click", onClickItem);
     clearBtn.addEventListener("click", clearItems);
     itemFilter.addEventListener("input", filterItems);
     document.addEventListener("DOMContentLoaded", displayItems);
